@@ -7,31 +7,55 @@ on:
   pull_request:
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # https://endoflife.date/python
-        # https://github.com/actions/runner-images
-        python-version:
-          - "3.9"
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: set up python ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.8.3"
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.13"
 
-      - run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: uv sync
 
-      - run: pip install flake8 bandit
+      - name: Run Ruff linter
+        uses: astral-sh/ruff-action@v3
+        with:
+          src: "./"
 
-      - run: flake8 --max-line-length 120 *.py
+      - name: Run Ruff formatter check
+        uses: astral-sh/ruff-action@v3
+        with:
+          src: "./"
+          args: "format --check"
 
-      - run: bandit *.py
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "0.8.3"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Install ty
+        run: uv add --dev ty
+
+      - name: Run ty type checker
+        run: uv run ty check *.py

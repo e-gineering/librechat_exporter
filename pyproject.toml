@@ -11,3 +11,9 @@ dependencies = [
     "python-dotenv==1.1.1",
     "twisted==25.5.0",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff==0.12.7",
+    "ty==0.0.1a16",
+]
