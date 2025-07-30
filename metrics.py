@@ -164,14 +164,19 @@ class LibreChatMetricsCollector(Collector):
         """
         try:
             pipeline = [
-                {"$match": {"sender": {"$ne": "User"}, "user": {"$exists": True, "$ne": None}}},
+                {
+                    "$match": {
+                        "sender": {"$ne": "User"},
+                        "user": {"$exists": True, "$ne": None},
+                    }
+                },
                 {"$addFields": {"userObjectId": {"$toObjectId": "$user"}}},
                 {
                     "$lookup": {
                         "from": "users",
                         "localField": "userObjectId",
                         "foreignField": "_id",
-                        "as": "userInfo"
+                        "as": "userInfo",
                     }
                 },
                 {"$unwind": {"path": "$userInfo", "preserveNullAndEmptyArrays": True}},
@@ -180,9 +185,9 @@ class LibreChatMetricsCollector(Collector):
                         "_id": {
                             "model": "$model",
                             "user": "$user",
-                            "email": {"$ifNull": ["$userInfo.email", "unknown"]}
+                            "email": {"$ifNull": ["$userInfo.email", "unknown"]},
                         },
-                        "messageCount": {"$sum": 1}
+                        "messageCount": {"$sum": 1},
                     }
                 },
             ]
@@ -197,7 +202,9 @@ class LibreChatMetricsCollector(Collector):
                 email = result["_id"]["email"]
                 count = result["messageCount"]
                 metric.add_metric([model, email], count)
-                logger.debug("Message count for model %s, user %s: %s", model, email, count)
+                logger.debug(
+                    "Message count for model %s, user %s: %s", model, email, count
+                )
             yield metric
         except Exception as e:
             logger.exception("Error collecting messages count per model: %s", e)
@@ -215,7 +222,7 @@ class LibreChatMetricsCollector(Collector):
                         "from": "users",
                         "localField": "userObjectId",
                         "foreignField": "_id",
-                        "as": "userInfo"
+                        "as": "userInfo",
                     }
                 },
                 {"$unwind": {"path": "$userInfo", "preserveNullAndEmptyArrays": True}},
@@ -224,9 +231,9 @@ class LibreChatMetricsCollector(Collector):
                         "_id": {
                             "model": "$model",
                             "user": "$user",
-                            "email": {"$ifNull": ["$userInfo.email", "unknown"]}
+                            "email": {"$ifNull": ["$userInfo.email", "unknown"]},
                         },
-                        "errorCount": {"$sum": 1}
+                        "errorCount": {"$sum": 1},
                     }
                 },
             ]
@@ -241,7 +248,9 @@ class LibreChatMetricsCollector(Collector):
                 email = result["_id"]["email"]
                 error_count = result["errorCount"]
                 metric.add_metric([model, email], error_count)
-                logger.debug("Error count for model %s, user %s: %s", model, email, error_count)
+                logger.debug(
+                    "Error count for model %s, user %s: %s", model, email, error_count
+                )
             yield metric
         except Exception as e:
             logger.exception("Error collecting error messages per model: %s", e)
@@ -257,7 +266,7 @@ class LibreChatMetricsCollector(Collector):
                         "sender": "User",
                         "tokenCount": {"$exists": True, "$ne": None},
                         "model": {"$exists": True, "$ne": None},
-                        "user": {"$exists": True, "$ne": None}
+                        "user": {"$exists": True, "$ne": None},
                     }
                 },
                 {"$addFields": {"userObjectId": {"$toObjectId": "$user"}}},
@@ -266,7 +275,7 @@ class LibreChatMetricsCollector(Collector):
                         "from": "users",
                         "localField": "userObjectId",
                         "foreignField": "_id",
-                        "as": "userInfo"
+                        "as": "userInfo",
                     }
                 },
                 {"$unwind": {"path": "$userInfo", "preserveNullAndEmptyArrays": True}},
@@ -275,7 +284,7 @@ class LibreChatMetricsCollector(Collector):
                         "_id": {
                             "model": "$model",
                             "user": "$user",
-                            "email": {"$ifNull": ["$userInfo.email", "unknown"]}
+                            "email": {"$ifNull": ["$userInfo.email", "unknown"]},
                         },
                         "totalInputTokens": {"$sum": "$tokenCount"},
                     }
@@ -292,7 +301,9 @@ class LibreChatMetricsCollector(Collector):
                 email = result["_id"]["email"]
                 tokens = result["totalInputTokens"]
                 metric.add_metric([model, email], tokens)
-                logger.debug("Input tokens for model %s, user %s: %s", model, email, tokens)
+                logger.debug(
+                    "Input tokens for model %s, user %s: %s", model, email, tokens
+                )
             yield metric
         except Exception as e:
             logger.exception("Error collecting number of input tokens per model", e)
@@ -308,7 +319,7 @@ class LibreChatMetricsCollector(Collector):
                         "sender": {"$ne": "User"},
                         "tokenCount": {"$exists": True, "$ne": None},
                         "model": {"$exists": True, "$ne": None},
-                        "user": {"$exists": True, "$ne": None}
+                        "user": {"$exists": True, "$ne": None},
                     }
                 },
                 {"$addFields": {"userObjectId": {"$toObjectId": "$user"}}},
@@ -317,7 +328,7 @@ class LibreChatMetricsCollector(Collector):
                         "from": "users",
                         "localField": "userObjectId",
                         "foreignField": "_id",
-                        "as": "userInfo"
+                        "as": "userInfo",
                     }
                 },
                 {"$unwind": {"path": "$userInfo", "preserveNullAndEmptyArrays": True}},
@@ -326,7 +337,7 @@ class LibreChatMetricsCollector(Collector):
                         "_id": {
                             "model": "$model",
                             "user": "$user",
-                            "email": {"$ifNull": ["$userInfo.email", "unknown"]}
+                            "email": {"$ifNull": ["$userInfo.email", "unknown"]},
                         },
                         "totalOutputTokens": {"$sum": "$tokenCount"},
                     }
@@ -343,7 +354,9 @@ class LibreChatMetricsCollector(Collector):
                 email = result["_id"]["email"]
                 tokens = result["totalOutputTokens"]
                 metric.add_metric([model, email], tokens)
-                logger.debug("Output tokens for model %s, user %s: %s", model, email, tokens)
+                logger.debug(
+                    "Output tokens for model %s, user %s: %s", model, email, tokens
+                )
             yield metric
         except Exception as e:
             logger.exception("Error collecting number of output tokens per model", e)
@@ -541,11 +554,15 @@ class LibreChatMetricsCollector(Collector):
                 model = result["_id"] or "unknown"
                 count = result["count"]
                 metric_5m.add_metric([model], count)
-                logger.debug("Messages in last 5 minutes for model %s: %s", model, count)
+                logger.debug(
+                    "Messages in last 5 minutes for model %s: %s", model, count
+                )
             yield metric_5m
 
         except Exception as e:
-            logger.exception("Error collecting messages per model per time period: %s", e)
+            logger.exception(
+                "Error collecting messages per model per time period: %s", e
+            )
 
     def collect_token_counts_5m(self):
         """
@@ -566,8 +583,12 @@ class LibreChatMetricsCollector(Collector):
                 },
                 {"$group": {"_id": None, "totalTokens": {"$sum": "$tokenCount"}}},
             ]
-            results_input_5m = list(self.messages_collection.aggregate(pipeline_input_5m))
-            input_tokens_5m = results_input_5m[0]["totalTokens"] if results_input_5m else 0
+            results_input_5m = list(
+                self.messages_collection.aggregate(pipeline_input_5m)
+            )
+            input_tokens_5m = (
+                results_input_5m[0]["totalTokens"] if results_input_5m else 0
+            )
             yield GaugeMetricFamily(
                 "librechat_input_tokens_5m",
                 "Number of input tokens used in the last 5 minutes",
@@ -586,8 +607,12 @@ class LibreChatMetricsCollector(Collector):
                 },
                 {"$group": {"_id": None, "totalTokens": {"$sum": "$tokenCount"}}},
             ]
-            results_output_5m = list(self.messages_collection.aggregate(pipeline_output_5m))
-            output_tokens_5m = results_output_5m[0]["totalTokens"] if results_output_5m else 0
+            results_output_5m = list(
+                self.messages_collection.aggregate(pipeline_output_5m)
+            )
+            output_tokens_5m = (
+                results_output_5m[0]["totalTokens"] if results_output_5m else 0
+            )
             yield GaugeMetricFamily(
                 "librechat_output_tokens_5m",
                 "Number of output tokens generated in the last 5 minutes",
@@ -611,7 +636,9 @@ class LibreChatMetricsCollector(Collector):
                     }
                 },
             ]
-            results_model_tokens_5m = self.messages_collection.aggregate(pipeline_model_tokens_5m)
+            results_model_tokens_5m = self.messages_collection.aggregate(
+                pipeline_model_tokens_5m
+            )
 
             input_metric_5m = GaugeMetricFamily(
                 "librechat_model_input_tokens_5m",
@@ -644,7 +671,9 @@ class LibreChatMetricsCollector(Collector):
                 output_metric_5m.add_metric([model], counts["output"])
                 logger.debug(
                     "Model %s tokens in last 5 minutes: input=%s, output=%s",
-                    model, counts["input"], counts["output"]
+                    model,
+                    counts["input"],
+                    counts["output"],
                 )
 
             yield input_metric_5m
@@ -671,7 +700,9 @@ class LibreChatMetricsCollector(Collector):
             )
             logger.debug("Error messages in last 5 minutes: %s", error_count_5m)
         except Exception as e:
-            logger.exception("Error collecting error message count in last 5 minutes: %s", e)
+            logger.exception(
+                "Error collecting error message count in last 5 minutes: %s", e
+            )
 
     def collect_error_count_per_model_5m(self):
         """
@@ -702,11 +733,15 @@ class LibreChatMetricsCollector(Collector):
                 error_count = result["errorCount"]
                 metric_5m.add_metric([model], error_count)
                 logger.debug(
-                    "Error messages in last 5 minutes for model %s: %s", model, error_count
+                    "Error messages in last 5 minutes for model %s: %s",
+                    model,
+                    error_count,
                 )
             yield metric_5m
         except Exception as e:
-            logger.exception("Error collecting error messages per model in last 5 minutes: %s", e)
+            logger.exception(
+                "Error collecting error messages per model in last 5 minutes: %s", e
+            )
 
 
 if __name__ == "__main__":
