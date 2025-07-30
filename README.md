@@ -33,23 +33,16 @@ The script connects to the MongoDB database used by LibreChat, aggregates releva
 Clone the repository containing the script:
 
 ```bash
-git clone https://github.com/yourusername/librechat-metrics.git
-cd librechat-metrics
+git clone https://github.com/yourusername/librechat_exporter.git
+cd librechat_exporter
 ```
 
 ### 2. Install Dependencies
 
-Use environment (strongly recommended!)
+Install the required Python packages using uv:
 
 ```sh
-python -m venv venv
-source venv/bin/activate
-```
-
-Install the required Python packages using pip:
-
-```sh
-pip install -r requirements.txt
+uv sync
 ```
 
 ### 3. Configure the Environment Variables
@@ -77,7 +70,7 @@ MONGODB_DATABASE=librechat
 Start the metrics collection script:
 
 ```sh
-python metrics.py
+uv run metrics.py
 ```
 
 The script will start an HTTP server to expose the metrics.
@@ -104,7 +97,7 @@ If you want to run the script inside the mongodb librechat container, you can ad
 
 ```yaml
 metrics:
-  image: ghcr.io/virtuos/librechat_exporter:main
+  image: ghcr.io/e-gineering/librechat_exporter:main
   networks:
     - librechat
   depends_on:
@@ -221,18 +214,16 @@ docker run -d -p 127.0.0.1:27017:27017 --name mongo mongo
 podman run -d -p 127.0.0.1:27017:27017 --name mongo mongo
 ```
 
-Create a virtual environment and install the dependencies:
+Install the dependencies:
 
 ```sh
-python -m venv venv
-. ./venv/bin/activate
-pip install -r requirements.txt
+uv sync
 ```
 
 Run the metrics exporter:
 
 ```sh
-python metrics.py
+uv run metrics.py
 ```
 
 Query the metrics endpoint:
@@ -258,8 +249,8 @@ In addition to real-time metrics monitoring, this tool supports historical analy
 Clone the repository and navigate to the historic-analysis directory:
 
 ```bash
-git clone https://github.com/yourusername/librechat-metrics.git
-cd librechat-metrics/historic-analysis
+git clone https://github.com/yourusername/librechat_exporter.git
+cd librechat_exporter/historic-analysis
 ```
 
 #### 2. Start the Docker Containers
@@ -285,7 +276,7 @@ Refer to [Install Dependencies](#2-install-dependencies) section above for setti
 The `export_metrics.py` script extracts historical data from MongoDB and loads it into MariaDB for analysis:
 
 ```bash
-python export_metrics.py YYYY-MM-DD YYYY-MM-DD
+uv run export_metrics.py YYYY-MM-DD YYYY-MM-DD
 ```
 
 Replace the date arguments with the start and end dates for your analysis period.
@@ -293,7 +284,7 @@ Replace the date arguments with the start and end dates for your analysis period
 Example:
 ```bash
 # Export metrics from January 1, 2024 to April 30, 2024
-python export_metrics.py 2024-01-01 2024-04-30
+uv run export_metrics.py 2024-01-01 2024-04-30
 ```
 
 The script will:

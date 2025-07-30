@@ -1,0 +1,13 @@
+[project]
+name = "librechat_exporter"
+version = "2.0.0"
+description = "LibreChat Metrics Exporter - Collects and exposes metrics from LibreChat for monitoring via Prometheus"
+requires-python = ">=3.13"
+dependencies = [
+    "mysql-connector-python==9.4.0",
+    "prometheus-client==0.22.1",
+    "pymongo==4.13.2",
+    "python-dateutil==2.9.0.post0",
+    "python-dotenv==1.1.1",
+    "twisted==25.5.0",
+]
