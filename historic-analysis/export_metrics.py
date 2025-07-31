@@ -40,20 +40,12 @@ def calculate_daily_metrics(date):
     end_time = datetime.combine(date, datetime.max.time())
 
     # Get messages for the day
-    messages = list(
-        mongo_db.messages.find({"createdAt": {"$gte": start_time, "$lte": end_time}})
-    )
+    messages = list(mongo_db.messages.find({"createdAt": {"$gte": start_time, "$lte": end_time}}))
 
     # Get conversations for the day
-    conversations = list(
-        mongo_db.conversations.find(
-            {"createdAt": {"$gte": start_time, "$lte": end_time}}
-        )
-    )
+    conversations = list(mongo_db.conversations.find({"createdAt": {"$gte": start_time, "$lte": end_time}}))
 
-    print(
-        f"Found {len(messages)} messages and {len(conversations)} conversations for {date}"
-    )
+    print(f"Found {len(messages)} messages and {len(conversations)} conversations for {date}")
 
     # Calculate metrics
     unique_users = len(set(msg.get("user") for msg in messages))
@@ -83,9 +75,7 @@ def calculate_daily_metrics(date):
                 tokens_by_model[model]["output"] += token_count.get("completion", 0)
             elif isinstance(token_count, int):
                 # If it's a single number, assume it's the total token count
-                tokens_by_model[model]["input"] += (
-                    token_count // 2
-                )  # Split evenly between input and output
+                tokens_by_model[model]["input"] += token_count // 2  # Split evenly between input and output
                 tokens_by_model[model]["output"] += token_count // 2
 
         # Error counts
@@ -182,9 +172,7 @@ def calculate_weekly_metrics(week_start):
     end_time = datetime.combine(week_end, datetime.max.time())
 
     # Get all messages for the week
-    messages = list(
-        mongo_db.messages.find({"createdAt": {"$gte": start_time, "$lte": end_time}})
-    )
+    messages = list(mongo_db.messages.find({"createdAt": {"$gte": start_time, "$lte": end_time}}))
 
     # Calculate unique users for the week
     unique_users = len(set(msg.get("user") for msg in messages))
@@ -231,9 +219,7 @@ def calculate_monthly_metrics(month_start):
     end_time = datetime.combine(month_end, datetime.max.time())
 
     # Get all messages for the month
-    messages = list(
-        mongo_db.messages.find({"createdAt": {"$gte": start_time, "$lte": end_time}})
-    )
+    messages = list(mongo_db.messages.find({"createdAt": {"$gte": start_time, "$lte": end_time}}))
 
     # Calculate unique users for the month
     unique_users = len(set(msg.get("user") for msg in messages))
@@ -301,9 +287,7 @@ def clear_metrics_tables():
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Calculate historical metrics for LibreChat"
-    )
+    parser = argparse.ArgumentParser(description="Calculate historical metrics for LibreChat")
     parser.add_argument("start_date", type=str, help="Start date in YYYY-MM-DD format")
     parser.add_argument("end_date", type=str, help="End date in YYYY-MM-DD format")
 

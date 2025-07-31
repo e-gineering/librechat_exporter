@@ -206,9 +206,7 @@ class LibreChatMetricsCollector(Collector):
                 email = result["_id"]["email"]
                 count = result["messageCount"]
                 metric.add_metric([model, email], count)
-                logger.debug(
-                    "Message count for model %s, user %s: %s", model, email, count
-                )
+                logger.debug("Message count for model %s, user %s: %s", model, email, count)
             yield metric
         except Exception as e:
             logger.exception("Error collecting messages count per model: %s", e)
@@ -252,9 +250,7 @@ class LibreChatMetricsCollector(Collector):
                 email = result["_id"]["email"]
                 error_count = result["errorCount"]
                 metric.add_metric([model, email], error_count)
-                logger.debug(
-                    "Error count for model %s, user %s: %s", model, email, error_count
-                )
+                logger.debug("Error count for model %s, user %s: %s", model, email, error_count)
             yield metric
         except Exception as e:
             logger.exception("Error collecting error messages per model: %s", e)
@@ -305,9 +301,7 @@ class LibreChatMetricsCollector(Collector):
                 email = result["_id"]["email"]
                 tokens = result["totalInputTokens"]
                 metric.add_metric([model, email], tokens)
-                logger.debug(
-                    "Input tokens for model %s, user %s: %s", model, email, tokens
-                )
+                logger.debug("Input tokens for model %s, user %s: %s", model, email, tokens)
             yield metric
         except Exception as e:
             logger.exception("Error collecting number of input tokens per model", e)
@@ -358,9 +352,7 @@ class LibreChatMetricsCollector(Collector):
                 email = result["_id"]["email"]
                 tokens = result["totalOutputTokens"]
                 metric.add_metric([model, email], tokens)
-                logger.debug(
-                    "Output tokens for model %s, user %s: %s", model, email, tokens
-                )
+                logger.debug("Output tokens for model %s, user %s: %s", model, email, tokens)
             yield metric
         except Exception as e:
             logger.exception("Error collecting number of output tokens per model", e)
@@ -371,11 +363,7 @@ class LibreChatMetricsCollector(Collector):
         """
         try:
             five_minutes_ago = datetime.now(timezone.utc) - timedelta(minutes=5)
-            active_users = len(
-                self.messages_collection.distinct(
-                    "user", {"createdAt": {"$gte": five_minutes_ago}}
-                )
-            )
+            active_users = len(self.messages_collection.distinct("user", {"createdAt": {"$gte": five_minutes_ago}}))
             logger.debug("Number of active users: %s", active_users)
             yield GaugeMetricFamily(
                 "librechat_active_users",
@@ -392,9 +380,7 @@ class LibreChatMetricsCollector(Collector):
         try:
             five_minutes_ago = datetime.now(timezone.utc) - timedelta(minutes=5)
             active_conversations = len(
-                self.messages_collection.distinct(
-                    "conversationId", {"createdAt": {"$gte": five_minutes_ago}}
-                )
+                self.messages_collection.distinct("conversationId", {"createdAt": {"$gte": five_minutes_ago}})
             )
             logger.debug("Number of active conversations: %s", active_conversations)
             yield GaugeMetricFamily(
@@ -439,14 +425,8 @@ class LibreChatMetricsCollector(Collector):
         Collect number of unique users active in the current day.
         """
         try:
-            start_of_day = datetime.now(timezone.utc).replace(
-                hour=0, minute=0, second=0, microsecond=0
-            )
-            unique_users = len(
-                self.messages_collection.distinct(
-                    "user", {"createdAt": {"$gte": start_of_day}}
-                )
-            )
+            start_of_day = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+            unique_users = len(self.messages_collection.distinct("user", {"createdAt": {"$gte": start_of_day}}))
             logger.debug("Daily unique users: %s", unique_users)
             yield GaugeMetricFamily(
                 "librechat_daily_unique_users",
@@ -465,15 +445,9 @@ class LibreChatMetricsCollector(Collector):
             # Calculate days since Monday (0=Monday, 1=Tuesday, etc.)
             days_since_monday = now.weekday()
             # Get the start of current week (Monday 00:00:00)
-            start_of_week = (now - timedelta(days=days_since_monday)).replace(
-                hour=0, minute=0, second=0, microsecond=0
-            )
+            start_of_week = (now - timedelta(days=days_since_monday)).replace(hour=0, minute=0, second=0, microsecond=0)
 
-            unique_users = len(
-                self.messages_collection.distinct(
-                    "user", {"createdAt": {"$gte": start_of_week}}
-                )
-            )
+            unique_users = len(self.messages_collection.distinct("user", {"createdAt": {"$gte": start_of_week}}))
             logger.debug("Weekly unique users: %s", unique_users)
             yield GaugeMetricFamily(
                 "librechat_weekly_unique_users",
@@ -490,15 +464,9 @@ class LibreChatMetricsCollector(Collector):
         try:
             now = datetime.now(timezone.utc)
             # Get the start of current month (1st day 00:00:00)
-            start_of_month = now.replace(
-                day=1, hour=0, minute=0, second=0, microsecond=0
-            )
+            start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-            unique_users = len(
-                self.messages_collection.distinct(
-                    "user", {"createdAt": {"$gte": start_of_month}}
-                )
-            )
+            unique_users = len(self.messages_collection.distinct("user", {"createdAt": {"$gte": start_of_month}}))
             logger.debug("Monthly unique users: %s", unique_users)
             yield GaugeMetricFamily(
                 "librechat_monthly_unique_users",
@@ -517,9 +485,7 @@ class LibreChatMetricsCollector(Collector):
             five_minutes_ago = now - timedelta(minutes=5)
 
             # 5-minute message count
-            five_min_count = self.messages_collection.count_documents(
-                {"createdAt": {"$gte": five_minutes_ago}}
-            )
+            five_min_count = self.messages_collection.count_documents({"createdAt": {"$gte": five_minutes_ago}})
             yield GaugeMetricFamily(
                 "librechat_messages_5m",
                 "Number of messages sent in the last 5 minutes",
@@ -558,15 +524,11 @@ class LibreChatMetricsCollector(Collector):
                 model = result["_id"] or "unknown"
                 count = result["count"]
                 metric_5m.add_metric([model], count)
-                logger.debug(
-                    "Messages in last 5 minutes for model %s: %s", model, count
-                )
+                logger.debug("Messages in last 5 minutes for model %s: %s", model, count)
             yield metric_5m
 
         except Exception as e:
-            logger.exception(
-                "Error collecting messages per model per time period: %s", e
-            )
+            logger.exception("Error collecting messages per model per time period: %s", e)
 
     def collect_token_counts_5m(self):
         """
@@ -587,12 +549,8 @@ class LibreChatMetricsCollector(Collector):
                 },
                 {"$group": {"_id": None, "totalTokens": {"$sum": "$tokenCount"}}},
             ]
-            results_input_5m = list(
-                self.messages_collection.aggregate(pipeline_input_5m)
-            )
-            input_tokens_5m = (
-                results_input_5m[0]["totalTokens"] if results_input_5m else 0
-            )
+            results_input_5m = list(self.messages_collection.aggregate(pipeline_input_5m))
+            input_tokens_5m = results_input_5m[0]["totalTokens"] if results_input_5m else 0
             yield GaugeMetricFamily(
                 "librechat_input_tokens_5m",
                 "Number of input tokens used in the last 5 minutes",
@@ -611,12 +569,8 @@ class LibreChatMetricsCollector(Collector):
                 },
                 {"$group": {"_id": None, "totalTokens": {"$sum": "$tokenCount"}}},
             ]
-            results_output_5m = list(
-                self.messages_collection.aggregate(pipeline_output_5m)
-            )
-            output_tokens_5m = (
-                results_output_5m[0]["totalTokens"] if results_output_5m else 0
-            )
+            results_output_5m = list(self.messages_collection.aggregate(pipeline_output_5m))
+            output_tokens_5m = results_output_5m[0]["totalTokens"] if results_output_5m else 0
             yield GaugeMetricFamily(
                 "librechat_output_tokens_5m",
                 "Number of output tokens generated in the last 5 minutes",
@@ -640,9 +594,7 @@ class LibreChatMetricsCollector(Collector):
                     }
                 },
             ]
-            results_model_tokens_5m = self.messages_collection.aggregate(
-                pipeline_model_tokens_5m
-            )
+            results_model_tokens_5m = self.messages_collection.aggregate(pipeline_model_tokens_5m)
 
             input_metric_5m = GaugeMetricFamily(
                 "librechat_model_input_tokens_5m",
@@ -704,9 +656,7 @@ class LibreChatMetricsCollector(Collector):
             )
             logger.debug("Error messages in last 5 minutes: %s", error_count_5m)
         except Exception as e:
-            logger.exception(
-                "Error collecting error message count in last 5 minutes: %s", e
-            )
+            logger.exception("Error collecting error message count in last 5 minutes: %s", e)
 
     def collect_error_count_per_model_5m(self):
         """
@@ -743,48 +693,48 @@ class LibreChatMetricsCollector(Collector):
                 )
             yield metric_5m
         except Exception as e:
-            logger.exception(
-                "Error collecting error messages per model in last 5 minutes: %s", e
-            )
+            logger.exception("Error collecting error messages per model in last 5 minutes: %s", e)
 
     def get_ttl_hash(self, seconds=3600):
         """
         Return the same value within `seconds` time period for cache TTL.
         """
         return round(time.time() / seconds)
-    
+
     def format_cost(self, cost):
         """
         Format cost value to show full decimal precision without trailing zeros.
         """
-        return f"{cost:.12f}".rstrip('0').rstrip('.')
+        return f"{cost:.12f}".rstrip("0").rstrip(".")
 
     @lru_cache(maxsize=200)  # Cache pricing for up to 200 different models
     def get_cached_cost_per_token(self, model, ttl_hash=None):
         """
         Get cost per token with TTL caching (1 hour TTL, 200 model cache limit).
-        
+
         Cache Strategy:
         - maxsize=200: Stores pricing for up to 200 different AI models simultaneously
         - When cache is full, least recently used models are evicted
         - ttl_hash rotates every hour, forcing fresh API calls for updated pricing
         - Should handle most LibreChat deployments (even with many model variants)
-        
+
         Args:
             model: AI model name (e.g. 'gpt-4', 'claude-3-5-sonnet-20241022')
             ttl_hash: Time-based hash for cache expiration (auto-generated every hour)
-            
+
         Returns:
             tuple: (input_cost_per_token, output_cost_per_token)
         """
         del ttl_hash  # Not used in function logic
         logger.info("Making LiteLLM API call for pricing data: model=%s", model)
         try:
-            input_cost, output_cost = litellm.cost_per_token(
-                model=model, prompt_tokens=1, completion_tokens=1
+            input_cost, output_cost = litellm.cost_per_token(model=model, prompt_tokens=1, completion_tokens=1)
+            logger.info(
+                "LiteLLM API call successful: model=%s, input_cost=$%s/token, output_cost=$%s/token",
+                model,
+                self.format_cost(input_cost),
+                self.format_cost(output_cost),
             )
-            logger.info("LiteLLM API call successful: model=%s, input_cost=$%s/token, output_cost=$%s/token", 
-                       model, self.format_cost(input_cost), self.format_cost(output_cost))
             return input_cost, output_cost
         except Exception as e:
             logger.warning("LiteLLM API call failed for model %s: %s - using fallback cost $0.00", model, e)
@@ -832,50 +782,54 @@ class LibreChatMetricsCollector(Collector):
                 "Total API usage costs in USD",
                 labels=["model", "user_email"],
             )
-            
+
             # Get TTL hash for 1-hour cache
             ttl_hash = self.get_ttl_hash(3600)
-            
+
             # Track costs per model/user combination
             cost_aggregates = {}
-            
+
             for result in results:
                 model = result["_id"]["model"] or "unknown"
                 email = result["_id"]["email"]
                 sender = result["_id"]["sender"]
                 token_count = result["totalTokens"]
-                
+
                 # Get cached pricing data (logs cache hits vs API calls)
-                input_cost_per_token, output_cost_per_token = self.get_cached_cost_per_token(
-                    model, ttl_hash=ttl_hash
+                input_cost_per_token, output_cost_per_token = self.get_cached_cost_per_token(model, ttl_hash=ttl_hash)
+                logger.debug(
+                    "Using pricing for model %s: input=$%s/token, output=$%s/token",
+                    model,
+                    self.format_cost(input_cost_per_token),
+                    self.format_cost(output_cost_per_token),
                 )
-                logger.debug("Using pricing for model %s: input=$%s/token, output=$%s/token", 
-                           model, self.format_cost(input_cost_per_token), self.format_cost(output_cost_per_token))
-                
+
                 # Calculate cost based on sender type
                 if sender == "User":
                     cost = token_count * input_cost_per_token
                 else:
                     cost = token_count * output_cost_per_token
-                
+
                 # Aggregate costs by model and user
                 key = (model, email)
                 if key not in cost_aggregates:
                     cost_aggregates[key] = 0.0
                 cost_aggregates[key] += cost
-                
+
                 logger.debug(
                     "Cost calculation: model=%s, user=%s, sender=%s, tokens=%s, cost=$%s",
-                    model, email, sender, token_count, self.format_cost(cost)
+                    model,
+                    email,
+                    sender,
+                    token_count,
+                    self.format_cost(cost),
                 )
-            
+
             # Add aggregated costs to metric
             for (model, email), total_cost in cost_aggregates.items():
                 metric.add_metric([model, email], total_cost)
-                logger.debug(
-                    "Total cost for model %s, user %s: $%s", model, email, self.format_cost(total_cost)
-                )
-            
+                logger.debug("Total cost for model %s, user %s: $%s", model, email, self.format_cost(total_cost))
+
             yield metric
         except Exception as e:
             logger.exception("Error collecting usage costs: %s", e)
