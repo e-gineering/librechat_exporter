@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "config:recommended",
+    ":disableRateLimiting",
+    "group:allNonMajor"
+  ],
+  "timezone": "America/New_York",
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json"
+}
