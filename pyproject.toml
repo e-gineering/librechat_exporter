@@ -1,6 +1,6 @@
 [project]
 name = "librechat_exporter"
-version = "2.1.0"
+version = "2.2.0"
 description = "LibreChat Metrics Exporter - Collects and exposes metrics from LibreChat for monitoring via Prometheus"
 requires-python = ">=3.10"
 dependencies = [
