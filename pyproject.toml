@@ -4,7 +4,7 @@ version = "2.1.0"
 description = "LibreChat Metrics Exporter - Collects and exposes metrics from LibreChat for monitoring via Prometheus"
 requires-python = ">=3.10"
 dependencies = [
-    "litellm==1.73.6",
+    "litellm==1.74.12",
     "mysql-connector-python==9.4.0",
     "prometheus-client==0.22.1",
     "pymongo==4.13.2",
