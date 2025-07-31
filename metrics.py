@@ -1,9 +1,12 @@
 import logging
 import os
+import time
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 
+import litellm
 from dotenv import load_dotenv
-from prometheus_client.core import REGISTRY, GaugeMetricFamily, CounterMetricFamily
+from prometheus_client.core import REGISTRY, CounterMetricFamily, GaugeMetricFamily
 from prometheus_client.registry import Collector
 from prometheus_client.twisted import MetricsResource
 from pymongo import MongoClient
@@ -62,6 +65,7 @@ class LibreChatMetricsCollector(Collector):
         yield from self.collect_token_counts_5m()
         yield from self.collect_error_message_count_5m()
         yield from self.collect_error_count_per_model_5m()
+        yield from self.collect_usage_cost_total()
 
     def collect_message_count(self):
         """
@@ -742,6 +746,139 @@ class LibreChatMetricsCollector(Collector):
             logger.exception(
                 "Error collecting error messages per model in last 5 minutes: %s", e
             )
+
+    def get_ttl_hash(self, seconds=3600):
+        """
+        Return the same value within `seconds` time period for cache TTL.
+        """
+        return round(time.time() / seconds)
+    
+    def format_cost(self, cost):
+        """
+        Format cost value to show full decimal precision without trailing zeros.
+        """
+        return f"{cost:.12f}".rstrip('0').rstrip('.')
+
+    @lru_cache(maxsize=200)  # Cache pricing for up to 200 different models
+    def get_cached_cost_per_token(self, model, ttl_hash=None):
+        """
+        Get cost per token with TTL caching (1 hour TTL, 200 model cache limit).
+        
+        Cache Strategy:
+        - maxsize=200: Stores pricing for up to 200 different AI models simultaneously
+        - When cache is full, least recently used models are evicted
+        - ttl_hash rotates every hour, forcing fresh API calls for updated pricing
+        - Should handle most LibreChat deployments (even with many model variants)
+        
+        Args:
+            model: AI model name (e.g. 'gpt-4', 'claude-3-5-sonnet-20241022')
+            ttl_hash: Time-based hash for cache expiration (auto-generated every hour)
+            
+        Returns:
+            tuple: (input_cost_per_token, output_cost_per_token)
+        """
+        del ttl_hash  # Not used in function logic
+        logger.info("Making LiteLLM API call for pricing data: model=%s", model)
+        try:
+            input_cost, output_cost = litellm.cost_per_token(
+                model=model, prompt_tokens=1, completion_tokens=1
+            )
+            logger.info("LiteLLM API call successful: model=%s, input_cost=$%s/token, output_cost=$%s/token", 
+                       model, self.format_cost(input_cost), self.format_cost(output_cost))
+            return input_cost, output_cost
+        except Exception as e:
+            logger.warning("LiteLLM API call failed for model %s: %s - using fallback cost $0.00", model, e)
+            # Return zero costs if pricing lookup fails
+            return 0.0, 0.0
+
+    def collect_usage_cost_total(self):
+        """
+        Collect total usage costs in USD per model and user.
+        """
+        try:
+            pipeline = [
+                {
+                    "$match": {
+                        "tokenCount": {"$exists": True, "$ne": None},
+                        "model": {"$exists": True, "$ne": None},
+                        "user": {"$exists": True, "$ne": None},
+                    }
+                },
+                {"$addFields": {"userObjectId": {"$toObjectId": "$user"}}},
+                {
+                    "$lookup": {
+                        "from": "users",
+                        "localField": "userObjectId",
+                        "foreignField": "_id",
+                        "as": "userInfo",
+                    }
+                },
+                {"$unwind": {"path": "$userInfo", "preserveNullAndEmptyArrays": True}},
+                {
+                    "$group": {
+                        "_id": {
+                            "model": "$model",
+                            "user": "$user",
+                            "email": {"$ifNull": ["$userInfo.email", "unknown"]},
+                            "sender": "$sender",
+                        },
+                        "totalTokens": {"$sum": "$tokenCount"},
+                    }
+                },
+            ]
+            results = self.messages_collection.aggregate(pipeline)
+            metric = CounterMetricFamily(
+                "librechat_usage_cost_total_usd",
+                "Total API usage costs in USD",
+                labels=["model", "user_email"],
+            )
+            
+            # Get TTL hash for 1-hour cache
+            ttl_hash = self.get_ttl_hash(3600)
+            
+            # Track costs per model/user combination
+            cost_aggregates = {}
+            
+            for result in results:
+                model = result["_id"]["model"] or "unknown"
+                email = result["_id"]["email"]
+                sender = result["_id"]["sender"]
+                token_count = result["totalTokens"]
+                
+                # Get cached pricing data (logs cache hits vs API calls)
+                input_cost_per_token, output_cost_per_token = self.get_cached_cost_per_token(
+                    model, ttl_hash=ttl_hash
+                )
+                logger.debug("Using pricing for model %s: input=$%s/token, output=$%s/token", 
+                           model, self.format_cost(input_cost_per_token), self.format_cost(output_cost_per_token))
+                
+                # Calculate cost based on sender type
+                if sender == "User":
+                    cost = token_count * input_cost_per_token
+                else:
+                    cost = token_count * output_cost_per_token
+                
+                # Aggregate costs by model and user
+                key = (model, email)
+                if key not in cost_aggregates:
+                    cost_aggregates[key] = 0.0
+                cost_aggregates[key] += cost
+                
+                logger.debug(
+                    "Cost calculation: model=%s, user=%s, sender=%s, tokens=%s, cost=$%s",
+                    model, email, sender, token_count, self.format_cost(cost)
+                )
+            
+            # Add aggregated costs to metric
+            for (model, email), total_cost in cost_aggregates.items():
+                metric.add_metric([model, email], total_cost)
+                logger.debug(
+                    "Total cost for model %s, user %s: $%s", model, email, self.format_cost(total_cost)
+                )
+            
+            yield metric
+        except Exception as e:
+            logger.exception("Error collecting usage costs: %s", e)
 
 
 if __name__ == "__main__":

@@ -6,3 +6,4 @@ mariadb-dev/init/init.sql
 venv
 .venv
 .env
+__pycache__

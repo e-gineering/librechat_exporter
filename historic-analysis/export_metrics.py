@@ -1,9 +1,10 @@
-import mysql.connector
-from datetime import datetime, timedelta
-import pymongo
-from collections import defaultdict
 import argparse
 import sys
+from collections import defaultdict
+from datetime import datetime, timedelta
+
+import mysql.connector
+import pymongo
 
 # Database connections
 try:

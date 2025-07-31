@@ -22,7 +22,7 @@ The script connects to the MongoDB database used by LibreChat, aggregates releva
 
 ## Prerequisites
 
-- **Python 3.6** or higher
+- **uv**
 - Access to the **LibreChat MongoDB** database
 - **Prometheus** installed and configured to scrape the metrics endpoint
 
@@ -118,7 +118,7 @@ The exporter provides the following metrics specific to LibreChat:
 
 ```sh
 # HELP librechat_messages_total Number of sent messages stored in the database
-# TYPE librechat_messages_total counter
+# TYPE librechat_messages_total gauge
 librechat_messages_total 9.0
 
 # HELP librechat_error_messages_total Number of error messages stored in the database
@@ -126,29 +126,36 @@ librechat_messages_total 9.0
 librechat_error_messages_total 0.0
 
 # HELP librechat_input_tokens_total Number of input tokens processed
-# TYPE librechat_input_tokens_total counter
+# TYPE librechat_input_tokens_total gauge
 librechat_input_tokens_total 0.0
 
 # HELP librechat_output_tokens_total Total number of output tokens generated
-# TYPE librechat_output_tokens_total counter
+# TYPE librechat_output_tokens_total gauge
 librechat_output_tokens_total 0.0
 
 # HELP librechat_conversations_total Number of started conversations stored in the database
-# TYPE librechat_conversations_total counter
+# TYPE librechat_conversations_total gauge
 librechat_conversations_total 0.0
 
-# HELP librechat_messages_per_model_total Number of messages per model
-# TYPE librechat_messages_per_model_total counter
-librechat_messages_per_model_total{model="unknown"} 9.0
+# HELP librechat_messages_per_model_total Number of messages per model and user
+# TYPE librechat_messages_per_model_total gauge
+librechat_messages_per_model_total{model="gpt-4",user_email="user@example.com"} 9.0
 
-# HELP librechat_errors_per_model_total Number of error messages per model
+# HELP librechat_errors_per_model_total Number of error messages per model and user
 # TYPE librechat_errors_per_model_total counter
+librechat_errors_per_model_total{model="gpt-4",user_email="user@example.com"} 0.0
 
-# HELP librechat_input_tokens_per_model_total Number of input tokens per model
-# TYPE librechat_input_tokens_per_model_total counter
+# HELP librechat_input_tokens_per_model_total Number of input tokens per model and user
+# TYPE librechat_input_tokens_per_model_total gauge
+librechat_input_tokens_per_model_total{model="gpt-4",user_email="user@example.com"} 1500.0
 
-# HELP librechat_output_tokens_per_model_total Number of output tokens per model
-# TYPE librechat_output_tokens_per_model_total counter
+# HELP librechat_output_tokens_per_model_total Number of output tokens per model and user
+# TYPE librechat_output_tokens_per_model_total gauge
+librechat_output_tokens_per_model_total{model="gpt-4",user_email="user@example.com"} 2000.0
+
+# HELP librechat_usage_cost_total_usd Total API usage costs in USD
+# TYPE librechat_usage_cost_total_usd counter
+librechat_usage_cost_total_usd{model="gpt-4",user_email="user@example.com"} 0.0450
 
 # HELP librechat_active_users Number of active users in the last 5 minutes
 # TYPE librechat_active_users gauge
@@ -201,6 +208,14 @@ librechat_model_input_tokens_5m{model="gpt-4"} 50.0
 # HELP librechat_model_output_tokens_5m Output tokens per model in the last 5 minutes
 # TYPE librechat_model_output_tokens_5m gauge
 librechat_model_output_tokens_5m{model="gpt-4"} 100.0
+
+# HELP librechat_error_messages_5m Number of error messages in the last 5 minutes
+# TYPE librechat_error_messages_5m gauge
+librechat_error_messages_5m 0.0
+
+# HELP librechat_errors_per_model_5m Number of error messages per model in the last 5 minutes
+# TYPE librechat_errors_per_model_5m gauge
+librechat_errors_per_model_5m{model="gpt-4"} 0.0
 ```
 
 ## Development

@@ -1,9 +1,10 @@
 [project]
 name = "librechat_exporter"
-version = "2.0.0"
+version = "2.1.0"
 description = "LibreChat Metrics Exporter - Collects and exposes metrics from LibreChat for monitoring via Prometheus"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
+    "litellm==1.73.6",
     "mysql-connector-python==9.4.0",
     "prometheus-client==0.22.1",
     "pymongo==4.13.2",
@@ -12,8 +13,17 @@ dependencies = [
     "twisted==25.5.0",
 ]
 
+
 [dependency-groups]
 dev = [
     "ruff==0.12.7",
     "ty==0.0.1a16",
+]
+
+[tool.ruff]
+line-length = 120
+lint.select = [
+    "E", # pycodestyle
+    "F", # pyflakes
+    "I", # isort
 ]
