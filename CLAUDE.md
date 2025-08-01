@@ -4,27 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-LibreChat Exporter is a Python-based monitoring tool that extracts metrics from LibreChat's MongoDB database and exposes them in Prometheus-compatible format. It provides both real-time metrics collection and historical analysis capabilities with Grafana visualization.
+LibreChat Exporter is a Python-based monitoring tool that extracts metrics from LibreChat's MongoDB database and exposes them in Prometheus-compatible format. It provides real-time metrics collection for monitoring via Prometheus and Grafana.
 
 ## Core Architecture
 
-The system has two primary data paths:
+The system provides real-time monitoring:
 
 1. **Real-time Monitoring**: `metrics.py` → MongoDB → Prometheus metrics endpoint (port 8000) → Grafana/Prometheus
-2. **Historical Analysis**: `export_metrics.py` → MongoDB → MariaDB → Grafana dashboards
 
 ### Key Components
 
 - **`metrics.py`**: Main metrics collector that continuously reads from LibreChat's MongoDB and exposes Prometheus metrics
-- **`historic-analysis/export_metrics.py`**: Historical data exporter that processes date ranges and stores aggregated data in MariaDB
-- **Docker containers**: Multi-service setup supporting MariaDB, Grafana, and development Prometheus instances
+- **Docker containers**: Development setup supporting Prometheus instances
 
 ### Data Flow
 
 ```
 MongoDB (LibreChat) → Python Collector → Prometheus Metrics → Grafana Dashboard
-                   ↓
-              MariaDB (Historical) → Grafana Historical Analysis
 ```
 
 ## Essential Commands
@@ -45,15 +41,7 @@ curl -sf http://localhost:8000
 ```
 
 ### Historical Analysis
-```bash
-# Start MariaDB + Grafana stack
-cd historic-analysis && docker-compose up -d
-
-# Export historical data for date range
-uv run historic-analysis/export_metrics.py 2024-01-01 2024-12-31
-
-# Access Grafana at http://localhost:3000 (admin/admin)
-```
+For historical data analysis, use Prometheus with appropriate retention settings and query historical metrics using PromQL.
 
 ### Testing and Quality Assurance
 ```bash
@@ -68,6 +56,14 @@ The project uses GitHub Actions for CI/CD with:
 - **Ty** for type checking (allowed to fail in pre-alpha)
 - Integration tests across Python 3.9-3.13
 
+### Commit Message Guidelines
+Follow conventional commits with **sentence case** formatting:
+- ✅ `feat: Add new cost tracking metric`
+- ✅ `fix: Resolve MongoDB connection timeout`
+- ✅ `perf: Remove heavy dependency for faster startup`
+- ❌ `feat: add new cost tracking metric` (lowercase)
+- ❌ `FEAT: ADD NEW COST TRACKING METRIC` (all caps)
+
 ## Database Schemas
 
 ### MongoDB Collections (LibreChat source data)
@@ -76,14 +72,8 @@ The project uses GitHub Actions for CI/CD with:
 - **`files`**: Uploaded files metadata  
 - **`users`**: Registered user accounts
 
-### MariaDB Tables (Historical analysis)
-- **`daily_users`**: Daily unique user counts
-- **`daily_messages`**: Daily message and conversation totals
-- **`daily_messages_by_model`**: Message counts per AI model per day
-- **`daily_tokens_by_model`**: Token usage (input/output) per model per day
-- **`daily_errors_by_model`**: Error counts per model per day
-- **`weekly_users`**: Weekly unique user aggregations
-- **`monthly_users`**: Monthly unique user aggregations
+### Historical Data Storage
+Historical data is stored in Prometheus with configurable retention periods. Use PromQL queries to analyze trends over time.
 
 ## Configuration
 
@@ -126,11 +116,6 @@ metrics:
 ## Project Structure
 
 - **`metrics.py`**: Main metrics collector and Prometheus exporter
-- **`historic-analysis/`**: Historical analysis components
-  - **`export_metrics.py`**: MongoDB to MariaDB data export
-  - **`docker-compose.yml`**: MariaDB + Grafana stack
-  - **`mariadb-init/init.sql`**: Database schema definition
-  - **`Grafana-Dashboard-template.json`**: Pre-configured dashboard
 - **`prometheus-dev/`**: Development Prometheus setup
 - **`Dockerfile`**: Multi-stage uv-based container build
 - **`pyproject.toml`**: Modern Python package configuration with pinned dependencies

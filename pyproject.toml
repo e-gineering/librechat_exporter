@@ -5,10 +5,8 @@ description = "LibreChat Metrics Exporter - Collects and exposes metrics from Li
 requires-python = ">=3.10"
 dependencies = [
     "httpx==0.27.0",
-    "mysql-connector-python==9.4.0",
     "prometheus-client==0.22.1",
     "pymongo==4.13.2",
-    "python-dateutil==2.9.0.post0",
     "python-dotenv==1.1.1",
     "twisted==25.5.0",
 ]
