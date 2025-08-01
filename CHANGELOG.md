@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.3.0](https://github.com/e-gineering/librechat_exporter/compare/v2.2.0...v2.3.0) (2025-08-01)
+
+
+### Features
+
+* Add Grafana dashboard for per-user LibreChat usage monitoring ([35a2716](https://github.com/e-gineering/librechat_exporter/commit/35a27162254ae106f0fe4b69baa378d3e82a47ed))
+* Enhance Grafana dashboard with cost tracking panels ([8943aa9](https://github.com/e-gineering/librechat_exporter/commit/8943aa9a3cb30401af4173c93e52a0d8d91651a9))
+* Remove historic-analysis folder to focus on Prometheus for storage ([c4cb1e3](https://github.com/e-gineering/librechat_exporter/commit/c4cb1e3063e9cf94ce2ed9c509c0ec2f8d9a0d59)), closes [#13](https://github.com/e-gineering/librechat_exporter/issues/13)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#8](https://github.com/e-gineering/librechat_exporter/issues/8)) ([9c5c2dc](https://github.com/e-gineering/librechat_exporter/commit/9c5c2dcab52939e19f119e0557d49bbd6abe5e8a))
+
+
+### Performance Improvements
+
+* Remove litellm dependency for single call for pricing json ([ff62b65](https://github.com/e-gineering/librechat_exporter/commit/ff62b6545fcbb2102ccfd4b0cdc4a74bc9b85ff0))
+
+
+### Documentation
+
+* Add Grafana dashboard screenshot to README ([937362e](https://github.com/e-gineering/librechat_exporter/commit/937362e980924a3066ceb86f161838c9aead5acc))
+
+
+### Styles
+
+* fix code formatting with ruff formatter ([d2f60ea](https://github.com/e-gineering/librechat_exporter/commit/d2f60ea1563b69db059a15dc9b53b4e7a5644eae))
+
+
+### Miscellaneous
+
+* **deps:** update astral-sh/setup-uv action to v6 ([#9](https://github.com/e-gineering/librechat_exporter/issues/9)) ([7ae24d7](https://github.com/e-gineering/librechat_exporter/commit/7ae24d7a36def9ebb9a365c332ec308ff1887ce7))
+
 ## [2.2.0](https://github.com/e-gineering/librechat_exporter/compare/v2.1.0...v2.2.0) (2025-07-31)
 
 
