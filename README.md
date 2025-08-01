@@ -4,6 +4,9 @@ This tool collects and exposes various metrics from [LibreChat](https://www.libr
 
 ![librechat-metrics-active-users](https://github.com/user-attachments/assets/b7829936-25d8-46b9-8a9a-f54e7d685e64)
 
+## Grafana Dashboard
+
+![Grafana Dashboard](assets/grafana_screenshot.png)
 
 ## Overview
 
