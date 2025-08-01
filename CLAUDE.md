@@ -56,9 +56,16 @@ uv run historic-analysis/export_metrics.py 2024-01-01 2024-12-31
 ```
 
 ### Testing and Quality Assurance
+```bash
+# IMPORTANT: Run these commands after every code change
+uv run ruff check .          # Lint code for style and errors
+uv run ruff format .         # Format code consistently
+uv run ty                    # Type check (optional but recommended)
+```
+
 The project uses GitHub Actions for CI/CD with:
-- **Flake8** for code style (max line length: 120)
-- **Bandit** for security scanning
+- **Ruff** for code linting and formatting (max line length: 120)
+- **Ty** for type checking (allowed to fail in pre-alpha)
 - Integration tests across Python 3.9-3.13
 
 ## Database Schemas
