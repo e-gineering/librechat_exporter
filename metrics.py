@@ -165,7 +165,7 @@ class LibreChatMetricsCollector(Collector):
 
     def collect_message_count_per_model(self):
         """
-        Collect number of messages per model with user labels.
+        Collect number of messages per model with user labels and agent names.
         """
         try:
             pipeline = [
@@ -200,21 +200,26 @@ class LibreChatMetricsCollector(Collector):
             metric = GaugeMetricFamily(
                 "librechat_messages_per_model_total",
                 "Number of messages per model and user",
-                labels=["model", "user_email"],
+                labels=["model", "user_email", "agent_name"],
             )
             for result in results:
                 model = result["_id"]["model"] or "unknown"
                 email = result["_id"]["email"]
                 count = result["messageCount"]
-                metric.add_metric([model, email], count)
-                logger.debug("Message count for model %s, user %s: %s", model, email, count)
+
+                # Resolve agent name if this is an agent
+                _, agent_name = self.resolve_model_for_pricing(model)
+                agent_label = agent_name if agent_name else ""
+
+                metric.add_metric([model, email, agent_label], count)
+                logger.debug("Message count for model %s (agent: %s), user %s: %s", model, agent_label, email, count)
             yield metric
         except Exception as e:
             logger.exception("Error collecting messages count per model: %s", e)
 
     def collect_error_count_per_model(self):
         """
-        Collect number of error messages per model with user labels.
+        Collect number of error messages per model with user labels and agent names.
         """
         try:
             pipeline = [
@@ -244,21 +249,28 @@ class LibreChatMetricsCollector(Collector):
             metric = CounterMetricFamily(
                 "librechat_errors_per_model_total",
                 "Number of error messages per model and user",
-                labels=["model", "user_email"],
+                labels=["model", "user_email", "agent_name"],
             )
             for result in results:
                 model = result["_id"]["model"] or "unknown"
                 email = result["_id"]["email"]
                 error_count = result["errorCount"]
-                metric.add_metric([model, email], error_count)
-                logger.debug("Error count for model %s, user %s: %s", model, email, error_count)
+
+                # Resolve agent name if this is an agent
+                _, agent_name = self.resolve_model_for_pricing(model)
+                agent_label = agent_name if agent_name else ""
+
+                metric.add_metric([model, email, agent_label], error_count)
+                logger.debug(
+                    "Error count for model %s (agent: %s), user %s: %s", model, agent_label, email, error_count
+                )
             yield metric
         except Exception as e:
             logger.exception("Error collecting error messages per model: %s", e)
 
     def collect_input_token_count_per_model(self):
         """
-        Collect number of input tokens per model with user labels.
+        Collect number of input tokens per model with user labels and agent names.
         """
         try:
             pipeline = [
@@ -295,21 +307,26 @@ class LibreChatMetricsCollector(Collector):
             metric = GaugeMetricFamily(
                 "librechat_input_tokens_per_model_total",
                 "Number of input tokens per model and user",
-                labels=["model", "user_email"],
+                labels=["model", "user_email", "agent_name"],
             )
             for result in results:
                 model = result["_id"]["model"] or "unknown"
                 email = result["_id"]["email"]
                 tokens = result["totalInputTokens"]
-                metric.add_metric([model, email], tokens)
-                logger.debug("Input tokens for model %s, user %s: %s", model, email, tokens)
+
+                # Resolve agent name if this is an agent
+                _, agent_name = self.resolve_model_for_pricing(model)
+                agent_label = agent_name if agent_name else ""
+
+                metric.add_metric([model, email, agent_label], tokens)
+                logger.debug("Input tokens for model %s (agent: %s), user %s: %s", model, agent_label, email, tokens)
             yield metric
         except Exception as e:
             logger.exception("Error collecting number of input tokens per model", e)
 
     def collect_output_token_count_per_model(self):
         """
-        Collect number of output tokens per model with user labels.
+        Collect number of output tokens per model with user labels and agent names.
         """
         try:
             pipeline = [
@@ -346,14 +363,19 @@ class LibreChatMetricsCollector(Collector):
             metric = GaugeMetricFamily(
                 "librechat_output_tokens_per_model_total",
                 "Number of output tokens per model and user",
-                labels=["model", "user_email"],
+                labels=["model", "user_email", "agent_name"],
             )
             for result in results:
                 model = result["_id"]["model"] or "unknown"
                 email = result["_id"]["email"]
                 tokens = result["totalOutputTokens"]
-                metric.add_metric([model, email], tokens)
-                logger.debug("Output tokens for model %s, user %s: %s", model, email, tokens)
+
+                # Resolve agent name if this is an agent
+                _, agent_name = self.resolve_model_for_pricing(model)
+                agent_label = agent_name if agent_name else ""
+
+                metric.add_metric([model, email, agent_label], tokens)
+                logger.debug("Output tokens for model %s (agent: %s), user %s: %s", model, agent_label, email, tokens)
             yield metric
         except Exception as e:
             logger.exception("Error collecting number of output tokens per model", e)
