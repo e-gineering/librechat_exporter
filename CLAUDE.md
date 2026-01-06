@@ -6,6 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LibreChat Exporter is a Python-based monitoring tool that extracts metrics from LibreChat's MongoDB database and exposes them in Prometheus-compatible format. It provides real-time metrics collection for monitoring via Prometheus and Grafana.
 
+### Repository Information
+- **Upstream**: https://github.com/virtUOS/librechat_exporter
+- **This Fork**: https://github.com/e-gineering/librechat_exporter
+- **Production Instance**: Accessible via `ssh -i ~/.ssh/tardis root@libre`
+  - LibreChat directory: `~/LibreChat`
+  - Started with Docker Compose override file
+  - Uses E-gineering's librechat_exporter image from GHCR
+
 ## Core Architecture
 
 The system provides real-time monitoring:
@@ -71,6 +79,7 @@ Follow conventional commits with **sentence case** formatting:
 - **`conversations`**: Chat conversations with timestamps
 - **`files`**: Uploaded files metadata  
 - **`users`**: Registered user accounts
+- **`agents`**: Agent definitions with `id`, `name`, `model` (underlying model), `tools` (array of tool names)
 
 ### Historical Data Storage
 Historical data is stored in Prometheus with configurable retention periods. Use PromQL queries to analyze trends over time.
