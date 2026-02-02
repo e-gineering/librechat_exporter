@@ -32,7 +32,7 @@ jobs:
           version: "0.8.3"
 
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
