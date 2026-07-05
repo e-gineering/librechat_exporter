@@ -26,12 +26,12 @@ jobs:
         run: uv sync
 
       - name: Run Ruff linter
-        uses: astral-sh/ruff-action@v3
+        uses: astral-sh/ruff-action@v4.1.0
         with:
           src: "./"
 
       - name: Run Ruff formatter check
-        uses: astral-sh/ruff-action@v3
+        uses: astral-sh/ruff-action@v4.1.0
         with:
           src: "./"
           args: "format --check"
