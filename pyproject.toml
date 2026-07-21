@@ -8,7 +8,7 @@ dependencies = [
     "prometheus-client==0.22.1",
     "pymongo==4.13.2",
     "python-dotenv==1.1.1",
-    "twisted==25.5.0",
+    "twisted==26.4.0",
 ]
 
 
